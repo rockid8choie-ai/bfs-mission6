@@ -191,7 +191,7 @@ h3 { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── 랜딩 ── */
-.hero { padding: 72px 0 56px; text-align: center; }
+.hero { padding: 72px 20px 56px; text-align: center; }
 .hero-eyebrow {
   display: inline-block; font-size: 13px; font-weight: 700; color: var(--blue);
   background: var(--blue-soft); border-radius: 999px; padding: 6px 14px;
@@ -211,8 +211,44 @@ h3 { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
 }
 .feature-grid p { font-size: 13.5px; color: var(--ink-2); margin-top: 6px; }
 @media (max-width: 640px) {
-  .feature-grid { grid-template-columns: 1fr; }
+  .feature-grid { grid-template-columns: 1fr; gap: 10px; padding: 8px 0 48px; }
   h1 { font-size: 26px; }
+  h2 { font-size: 20px; }
+
+  .container, .container-wide { padding: 0 16px; }
+
+  .topbar-inner { height: 54px; gap: 10px; }
+  .brand img { height: 19px; }
+  .topbar-user {
+    max-width: 96px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .hero { padding: 44px 16px 32px; }
+  .hero-lede { font-size: 15px; }
+  .hero-lede br { display: none; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  .hero-actions a { display: flex; }
+  .hero-actions .btn { flex: 1; }
+
+  .page { padding: 20px 0 64px; }
+  .page-head { flex-wrap: wrap; row-gap: 8px; }
+
+  .work-toolbar { gap: 8px; }
+  .work-toolbar select { width: 100%; }
+  .work-item { padding: 14px; gap: 12px; }
+  .work-item .ico { width: 36px; height: 36px; }
+
+  .steps { gap: 6px; }
+  .step { font-size: 12px; padding: 8px 0; }
+
+  .detail-row { flex-direction: column; gap: 2px; }
+  .detail-row .k { width: auto; font-size: 12.5px; }
+  .detail-actions { flex-direction: column; }
+
+  .card, .card-white { padding: 16px; }
+  .done-wrap { padding: 56px 16px; }
+  .toast { width: calc(100% - 32px); text-align: center; bottom: 20px; }
 }
 
 /* ── 페이지 공통 ── */

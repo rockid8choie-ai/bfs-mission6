@@ -1,58 +1,108 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Field } from "../components/ui.jsx";
+import { login, signup } from "../lib/auth.js";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Login({ onLogin }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [mode, setMode] = useState("login"); // login | signup
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const isSignup = mode === "signup";
+
+  const switchMode = () => {
+    setMode(isSignup ? "login" : "signup");
+    setErrors({});
+  };
+
   const submit = async (e) => {
     e.preventDefault();
     const next = {};
-    if (!name.trim()) next.name = "이름을 입력해 주세요.";
-    if (pw.length < 4) next.pw = "비밀번호는 4자 이상이에요. (시뮬레이션)";
+    if (isSignup && !name.trim()) next.name = "이름을 입력해 주세요.";
+    if (!EMAIL_RE.test(email.trim()))
+      next.email = "이메일 형식을 확인해 주세요.";
+    if (pw.length < 6) next.pw = "비밀번호는 6자 이상이에요.";
     setErrors(next);
     if (Object.keys(next).length) return;
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 600)); // 인증 요청 시뮬레이션
-    onLogin(name.trim());
-    navigate(location.state?.from ?? "/works", { replace: true });
+    try {
+      const session = isSignup
+        ? await signup({ name: name.trim(), email: email.trim(), password: pw })
+        : await login({ email: email.trim(), password: pw });
+      onLogin(session);
+      navigate(location.state?.from ?? "/works", { replace: true });
+    } catch (error) {
+      setErrors({ submit: error.message });
+      setLoading(false);
+    }
   };
 
   return (
     <main className="container page" style={{ maxWidth: 420 }}>
       <div className="page-head">
-        <h2>로그인</h2>
+        <h2>{isSignup ? "회원가입" : "로그인"}</h2>
       </div>
       <p className="page-sub">
-        실제 인증이 아닌 localStorage 기반 시뮬레이션이에요.
+        {isSignup
+          ? "계정을 만들면 내 작업이 서버에 저장돼요."
+          : "내 계정으로 접수한 작업을 어디서든 확인해요."}
       </p>
       <form className="card-white" onSubmit={submit} noValidate>
-        <Field label="이름" error={errors.name}>
+        {isSignup && (
+          <Field label="이름" error={errors.name}>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="예: 김소장"
+              autoFocus
+            />
+          </Field>
+        )}
+        <Field label="이메일" error={errors.email}>
           <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="예: 김소장"
-            autoFocus
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            autoFocus={!isSignup}
           />
         </Field>
-        <Field label="비밀번호" error={errors.pw} hint="아무 4자 이상이면 통과돼요.">
+        <Field label="비밀번호" error={errors.pw} hint="6자 이상 입력해 주세요.">
           <input
             type="password"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
-            placeholder="••••"
+            placeholder="••••••"
           />
         </Field>
+        {errors.submit && <p className="field-error">{errors.submit}</p>}
         <Button block disabled={loading}>
-          {loading ? "확인 중…" : "로그인"}
+          {loading
+            ? "확인 중…"
+            : isSignup
+              ? "가입하고 시작하기"
+              : "로그인"}
         </Button>
       </form>
+      <p className="page-sub" style={{ textAlign: "center", marginTop: 14 }}>
+        {isSignup ? "이미 계정이 있나요?" : "처음이신가요?"}{" "}
+        <button
+          type="button"
+          className="back-link"
+          style={{ background: "none", border: 0, cursor: "pointer" }}
+          onClick={switchMode}
+        >
+          {isSignup ? "로그인" : "회원가입"}
+        </button>
+      </p>
     </main>
   );
 }

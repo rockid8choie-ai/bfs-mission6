@@ -25,7 +25,7 @@ export default function WorkList() {
   useEffect(() => {
     listWorks()
       .then(setWorks)
-      .catch(() => setError("작업 목록을 불러오지 못했어요."));
+      .catch((e) => setError(e?.message || "작업 목록을 불러오지 못했어요."));
   }, []);
 
   const visible = useMemo(() => {

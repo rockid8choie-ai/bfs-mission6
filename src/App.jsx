@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import TopBar from "./components/TopBar.jsx";
-import { getSession, login, logout } from "./lib/auth.js";
+import { getSession, logout } from "./lib/auth.js";
 import Done from "./pages/Done.jsx";
 import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Login.jsx";
@@ -21,7 +21,7 @@ function RequireAuth({ session, children }) {
 export default function App() {
   const [session, setSession] = useState(getSession);
 
-  const handleLogin = (name) => setSession(login(name));
+  const handleLogin = (session) => setSession(session);
   const handleLogout = () => {
     logout();
     setSession(null);

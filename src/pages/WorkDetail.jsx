@@ -24,7 +24,9 @@ export default function WorkDetail() {
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
-    getWork(id).then(setWork);
+    getWork(id)
+      .then(setWork)
+      .catch(() => setWork(null));
   }, [id]);
 
   if (work === undefined)
@@ -56,17 +58,26 @@ export default function WorkDetail() {
 
   const advance = async () => {
     setBusy(true);
-    const updated = await updateStatus(work.id, nextStatus);
-    setWork(updated);
-    setToast(`상태를 '${nextStatus}'로 변경했어요.`);
+    try {
+      const updated = await updateStatus(work.id, nextStatus);
+      setWork(updated);
+      setToast(`상태를 '${nextStatus}'로 변경했어요.`);
+    } catch (error) {
+      setToast(error?.message || "상태 변경에 실패했어요.");
+    }
     setBusy(false);
   };
 
   const remove = async () => {
     if (!window.confirm("이 작업을 삭제할까요?")) return;
     setBusy(true);
-    await removeWork(work.id);
-    navigate("/works");
+    try {
+      await removeWork(work.id);
+      navigate("/works");
+    } catch (error) {
+      setToast(error?.message || "삭제에 실패했어요.");
+      setBusy(false);
+    }
   };
 
   return (

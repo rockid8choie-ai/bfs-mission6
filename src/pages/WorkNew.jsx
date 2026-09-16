@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Field } from "../components/ui.jsx";
-import { CATEGORIES, createWork } from "../lib/storage.js";
+import { classifyWork } from "../lib/api.js";
+import { CATEGORIES, categoryOf, createWork } from "../lib/storage.js";
 
 const INITIAL = {
   title: "",
@@ -16,8 +17,36 @@ export default function WorkNew() {
   const [form, setForm] = useState(INITIAL);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
+  const [ai, setAi] = useState({ status: "idle" }); // idle | loading | done | error
 
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+
+  // OpenAI로 분류·우선순위 자동 추천 — 실패해도 수동 입력으로 계속 진행 가능
+  const suggest = async () => {
+    if (form.title.trim().length < 5) {
+      setErrors((prev) => ({
+        ...prev,
+        title: "AI 추천을 받으려면 제목을 5자 이상 입력해 주세요.",
+      }));
+      return;
+    }
+    setErrors((prev) => ({ ...prev, title: undefined }));
+    setAi({ status: "loading" });
+    try {
+      const result = await classifyWork({
+        title: form.title.trim(),
+        desc: form.desc.trim(),
+      });
+      setForm((prev) => ({
+        ...prev,
+        category: result.category,
+        priority: result.priority,
+      }));
+      setAi({ status: "done", result });
+    } catch (error) {
+      setAi({ status: "error", message: error.message });
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -37,8 +66,10 @@ export default function WorkNew() {
         desc: form.desc.trim(),
       });
       navigate("/done", { state: { workId: work.id, title: work.title } });
-    } catch {
-      setErrors({ submit: "저장에 실패했어요. 다시 시도해 주세요." });
+    } catch (error) {
+      setErrors({
+        submit: error?.message || "저장에 실패했어요. 다시 시도해 주세요.",
+      });
       setSaving(false);
     }
   };
@@ -60,6 +91,31 @@ export default function WorkNew() {
             autoFocus
           />
         </Field>
+
+        <div className="field">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={suggest}
+            disabled={ai.status === "loading"}
+          >
+            {ai.status === "loading"
+              ? "🤖 AI가 분석 중…"
+              : "🤖 AI로 분류·우선순위 추천받기"}
+          </Button>
+          {ai.status === "done" && (
+            <span className="field-hint">
+              AI 추천: {categoryOf(ai.result.category).label} ·{" "}
+              {ai.result.priority}
+              {ai.result.reason && ` — ${ai.result.reason}`} (아래에서 수정할 수
+              있어요)
+            </span>
+          )}
+          {ai.status === "error" && (
+            <span className="field-error">{ai.message}</span>
+          )}
+        </div>
 
         <Field label="분류">
           <select value={form.category} onChange={set("category")}>

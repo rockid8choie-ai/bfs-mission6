@@ -120,6 +120,7 @@ export default function WorkList() {
                     <span className="ico" aria-hidden>{cat.emoji}</span>
                     <span className="meta">
                       <span className="title">
+                        {w.fastTrack && "🚀 "}
                         {w.priority === "긴급" && "🚨 "}
                         {w.title}
                       </span>

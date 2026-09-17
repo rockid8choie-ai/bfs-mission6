@@ -74,3 +74,15 @@ export async function request(path, { method = "GET", body, auth = true } = {}) 
 export function classifyWork({ title, desc }) {
   return request("/ai/classify", { method: "POST", body: { title, desc } });
 }
+
+// 우선처리 결제 (토스) — 주문 생성과 최종 승인. 금액은 서버가 확정한다.
+export function checkoutPayment(workId) {
+  return request("/payments/checkout", { method: "POST", body: { workId } });
+}
+
+export function confirmPayment({ orderId, paymentKey, amount }) {
+  return request("/payments/confirm", {
+    method: "POST",
+    body: { orderId, paymentKey, amount },
+  });
+}

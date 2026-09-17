@@ -5,6 +5,7 @@ import { getSession, logout } from "./lib/auth.js";
 import Done from "./pages/Done.jsx";
 import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Login.jsx";
+import PayComplete from "./pages/PayComplete.jsx";
 import WorkDetail from "./pages/WorkDetail.jsx";
 import WorkList from "./pages/WorkList.jsx";
 import WorkNew from "./pages/WorkNew.jsx";
@@ -58,6 +59,14 @@ export default function App() {
           }
         />
         <Route path="/done" element={<Done />} />
+        <Route
+          path="/pay/complete"
+          element={
+            <RequireAuth session={session}>
+              <PayComplete />
+            </RequireAuth>
+          }
+        />
         <Route
           path="*"
           element={
